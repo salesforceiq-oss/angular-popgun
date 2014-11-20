@@ -1,0 +1,307 @@
+#!/bin/zsh
+
+self=$0
+command=$1
+shift
+
+# allow normal shell commands to be executed (eg: npm install)
+# # when the script is used as an ENTRYPOINT for a docker container
+if [ "$command" = "exec" ]; then
+  exec "$@"
+fi
+
+#################################################################################
+# environment checks for parallel and jq
+# TODO: don't check on *every* run...that's a lot of checks
+which parallel > /dev/null
+
+if [ $? -gt 0 ]; then
+  echo "!! parallel not found.  installing..."
+  brew install parallel
+  mkdir -p ~/.parallel
+  touch ~/.parallel/will-cite
+fi
+
+which jq > /dev/null
+if [ $? -gt 0 ]; then
+  echo "!! jq not found.  installing..."
+  brew install jq
+fi
+
+#################################################################################
+# configuration (export because `parallel`)
+export TERM=xterm-256color 
+
+export CMD_NPM=npm
+export CMD_TAPE=node_modules/tape/bin/tape
+export CMD_KARMA=node_modules/karma/bin/karma
+export CMD_BROWSERIFY=node_modules/browserify/bin/cmd.js
+export CMD_EXORCIST=node_modules/exorcist/bin/exorcist.js
+export CMD_WATCHIFY=node_modules/watchify/bin/cmd.js
+export CMD_WATCH=node_modules/chokidar-cli/index.js
+export CMD_SASS=node_modules/node-sass/bin/node-sass
+export CMD_TSC=node_modules/typescript/bin/tsc
+export CMD_TYPINGS=node_modules/typings/dist/bin.js
+export CMD_PARALLEL="parallel --line-buffer --halt 2"
+
+# read some names out of the package.json
+export ENTRY_POINT=$(jq -r .main package.json);
+export SRC_MAIN=$(jq -r .iqproj.main package.json);
+export DEFAULT_NAME=$(jq -r .name package.json);
+
+
+#################################################################################
+# Built-in [standard] commands
+OPT_SKIP_TESTS=''
+OPT_COLOR_LEVEL=$OPT_COLOR_LEVEL
+
+ARGSARR=( "$@" )
+ix=1
+
+while [ $ix -le ${#ARGSARR[@]} ]; do
+  echo ${ARGSARR[$ix]} | grep -E '^\-\w\w' > /dev/null
+
+  if [ $? -eq 0 ]; then
+    ARGSARR+=($(echo ${ARGSARR[$ix]} | sed 's,-,,g' | sed -E 's,[a-zA-Z],-& ,g'))
+  else
+    case ${ARGSARR[$ix]} in
+      "-c"|"--no-color") OPT_COLOR_LEVEL='nocolor' ;;
+      "-t"|"--no-test"|"--no-tests") OPT_SKIP_TESTS='true' ;;
+    esac
+  fi
+
+  ix=$(($ix + 1))
+done
+
+#################################################################################
+# utilities
+# if tput isn't found (eg: teamcity, docker containers, etc.) turn it into a no-op
+declare -A colors
+
+# dont print shell codes if running in a dumb terminal
+if [ -z "$OPT_COLOR_LEVEL" ]; then
+  colors[black]=$(echo -e '\e[30m')
+  colors[red]=$(echo -e '\e[31m')
+  colors[green]=$(echo -e '\e[32m')
+  colors[brown]=$(echo -e '\e[33m')
+  colors[blue]=$(echo -e '\e[34m')
+  colors[purple]=$(echo -e '\e[35m')
+  colors[cyan]=$(echo -e '\e[36m')
+  colors[light_gray]=$(echo -e '\e[37m')
+  colors[gray]=$(echo -e '\e[90m')
+  colors[light_red]=$(echo -e '\e[91m')
+  colors[light_green]=$(echo -e '\e[92m')
+  colors[yellow]=$(echo -e '\e[93m')
+  colors[light_blue]=$(echo -e '\e[94m')
+  colors[light_purple]=$(echo -e '\e[95m')
+  colors[light_cyan]=$(echo -e '\e[96m')
+  colors[white]=$(echo -e '\e[97m')
+  colors[reset]=$(echo -e '\e[0m')
+else
+  export OPT_COLOR_LEVEL="nocolor"
+fi
+
+function find-next-open-port() {
+  set +e
+
+  for port in $(seq $1 $(($1 + 1000))); do
+    echo "\035" | /usr/bin/nc 127.0.0.1 $port > /dev/null
+    if [ $? -gt 0 ]; then
+      echo $port
+      set -e
+      return 0
+    fi
+  done
+
+  set -e
+  return 1
+}
+
+#################################################################################
+# essential prep -- iqb outputs all build artifacts to the release/ folder
+mkdir -p release/
+
+#################################################################################
+# super basic override functionality.  here it's mostly used to run build steps
+# written in non-bash or that are complicated enough to merit their own file
+if [ -f "build/$command" ]; then
+  echo "• ${colors[brown]}RUN${colors[reset]} ${command} ===> build/$command $*"
+  exec build/$command "$@"
+else
+  echo "• ${colors[blue]}RUN${colors[reset]} $command $*"
+fi
+
+# NOTE: this uses node to get precision beyond seconds
+START_TIME=$(node -e "console.log(+new Date())")
+
+#################################################################################
+# Built-in [standard] commands
+# Any of these can be overridden by creating a `build/<taskname>` file
+set -e
+case $command in
+  ###########################################################################################################
+  # misc
+  ###########################################################################################################
+  "clean")
+    set +e
+    rm -rf .src
+    rm -rf .app
+    rm -rf release
+    set -e
+    ;;
+
+  "assets")
+    setopt null_glob
+    [ -n "$(echo assets/*)" ] && cp -R assets release
+    unsetopt null_glob
+    cp -R node_modules/uiq/src/assets release
+    ;;
+
+  "install")
+    $CMD_NPM install
+    $CMD_TYPINGS install
+    ;;
+
+  ###########################################################################################################
+  # tests
+  ###########################################################################################################
+  "watch:test") $self test && $CMD_WATCH --silent '.src/**/*.spec.js' -c "$self test" ;;
+  "test")
+    if [ -z "$OPT_COLOR_LEVEL" ]; then
+      $CMD_TAPE "${1:-.src/**/*.spec.js}" | node_modules/tap-min/bin/tap-min
+    else
+      $CMD_TAPE "${1:-.src/**/*.spec.js}"
+    fi
+    ;;
+
+  ###########################################################################################################
+  # scss
+  ###########################################################################################################
+  "watch:scss") $self build:scss && $CMD_WATCH --silent 'src/**/*.scss' -c "$self build:scss" ;;
+  "build:scss") [ -f app/app.scss ] && ($CMD_SASS app/app.scss > release/app.css || exit 1) ;;
+
+  ###########################################################################################################
+  # typescript
+  ###########################################################################################################
+  "build:ts")           $CMD_TSC -p src/ ;;
+  "watch:ts")           $CMD_TSC -w -p src/ ;;
+  "watch:ts:templates") $CMD_WATCH --silent 'src/**/*.html' -c "$self build:ts:templates" ;;
+  "build:ts:templates") 
+    mkdir -p ../.src
+
+    pushd src > /dev/null
+      # you're weird rsync 
+      rsync -am --include='*/' --include='*.html' --exclude='*' . ../.src
+    popd > /dev/null
+  ;;
+
+  "test:ts")
+    if [ -z "$1" ]; then
+      echo "Must specify a spec file"
+      exit 1;
+    fi
+
+    $self "test" $(echo $1 | sed s,ts$,js,g | sed s,src/,.src/,g)
+    ;;
+
+  "test:debug")
+    if [ -z "$1" ]; then
+      echo "Must specify a spec file"
+      exit 1;
+    fi
+
+    node-debug $TAPE_CMD $(echo $1 | sed s,ts$,js,g | sed s,src/,.src/,g)
+    ;;
+
+  ###########################################################################################################
+  # js (browserify)
+  ###########################################################################################################
+  "watch:js")           $CMD_WATCHIFY $ENTRY_POINT -d -v -o "$CMD_EXORCIST release/${DEFAULT_NAME}.js.map > release/${DEFAULT_NAME}.js" ;;
+  "build:js")           $CMD_BROWSERIFY $ENTRY_POINT -d | $CMD_EXORCIST release/${DEFAULT_NAME}.js.map > release/${DEFAULT_NAME}.js ;;
+
+  ###########################################################################################################
+  # local app 
+  ###########################################################################################################
+  "watch:app:html") $self build:app:html && $CMD_WATCH --silent 'app/**/*' -c "$self build:app:html" ;;
+  "build:app:html") 
+    mkdir -p .app/src
+
+    pushd app > /dev/null
+      rsync -am --include='*/' --include='*.html' --exclude='*' . ../.app
+    popd > /dev/null
+
+    cp app/index.html release/ 
+    ;;
+
+  "watch:app:ts")   $CMD_TSC -w -p app/ ;;
+  "build:app:ts")   $CMD_TSC -p app/ ;;
+
+  "watch:app:js")   $CMD_WATCHIFY .app/index.js -d -o "$CMD_EXORCIST release/app.js.map > release/app.js" ;;
+  "build:app:js")   $CMD_BROWSERIFY .app/index.js -d | $CMD_EXORCIST release/app.js.map > release/app.js ;;
+
+  "livereload")     $CMD_WATCH --silent release/* -c "curl -s http://localhost:${1:-35729}/changed\?files\=index.html" ;;
+  "serve")
+    SRV_PORT=$(find-next-open-port 8080)
+    LR_PORT=$(find-next-open-port 35729)
+    ${=CMD_PARALLEL} ::: "$self start-server --port $SRV_PORT --lr-port $LR_PORT release" "$self livereload $LR_PORT"
+    ;;
+
+    ###########################################################################################################
+    # primary entry points
+    ###########################################################################################################
+    "start"|"watch")
+    $self clean
+
+    prebuild=(
+      "$self assets"
+      "$self build:app:html"
+      "$self build:ts"
+      "$self build:ts:templates"
+    )
+    ${=CMD_PARALLEL} ::: "${prebuild[@]}"
+
+    $self "build:app:ts"
+
+    features=(
+      "$self serve"
+      "$self watch:js"
+      "$self watch:scss"
+      "$self watch:test"
+      "$self watch:ts"
+      "$self watch:ts:templates"
+      "$self watch:app:js"
+      "$self watch:app:ts"
+      "$self watch:app:html"
+    )
+
+    ${=CMD_PARALLEL} ::: "${features[@]}"
+    ;;
+
+  "build")
+    $self clean
+    ${=CMD_PARALLEL} ::: "$self build:ts" "$self build:ts:templates";
+
+    $self "build:app:ts"
+
+    features=(
+      "$self assets"
+      "$self test"
+      "$self build:scss"
+      "$self build:js"
+      "$self build:app:js"
+      "$self build:app:html"
+    );
+
+    ${=CMD_PARALLEL} ::: "${features[@]}"
+    ;;
+
+  *)
+    echo "Unknown command: $command"
+    exit 1
+esac
+
+END_TIME=$(node -e "console.log(+new Date())")
+ELAPSED=$(( $END_TIME - $START_TIME ))
+TIMESTR=$(node -e "console.log($ELAPSED < 1000 ? $ELAPSED + 'ms' : ($ELAPSED / 1000.0) + 's')");
+
+echo "✓ ${colors[green]}DONE [ $TIMESTR ]${colors[reset]} $command $*"

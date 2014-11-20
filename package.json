@@ -1,0 +1,56 @@
+{
+  "name": "angular-popgun",
+  "version": "0.0.1",
+  "description": "a template for basic ts packages",
+  "main": ".src/index.js",
+  "homepage": "https://github.com/relateiq/angular-popgun",
+  "repository": {
+    "url": "https://github.com/relateiq/angular-popgun.git"
+  },
+  "bugs": {
+    "url": "https://github.com/relateiq/angular-popgun/issues"
+  },
+  "scripts": {
+    "test": "bin/iqb test",
+    "start": "bin/iqb start",
+    "preversion": "bin/iqb test"
+  },
+  "peerDependencies": {
+    "angular": "1.x"
+  },
+  "devDependencies": {
+    "aliasify": "~1.9.0",
+    "browserify": "~13.0.0",
+    "chokidar-cli": "~1.0.1",
+    "connect-livereload": "~0.5.4",
+    "exorcist": "~0.4.0",
+    "express": "~4.13.4",
+    "http-proxy": "~1.13.2",
+    "jquery": "~2.1.0",
+    "node-sass": "~3.4.2",
+    "riq-partialify": "~3.1.6",
+    "shallow-diff": "0.0.5",
+    "tap-min": "~1.1.0",
+    "tape": "~4.5.1",
+    "tiny-lr": "~0.2.1",
+    "typescript": "~1.8.7",
+    "typings": "~0.8.1",
+    "uiq": "~0.63.3",
+    "watchify": "~3.7.0",
+    "web-core-router": "0.0.3",
+    "yargs": "~4.2.0"
+  },
+  "publishConfig": {
+    "registry": "https://relateiq.artifactoryonline.com/relateiq/api/npm/npm-local/"
+  },
+  "browserify-shim": {},
+  "browserify": {
+    "transform": [
+      "riq-partialify"
+    ]
+  },
+  "dependencies": {
+    "sugar": "~1.4.1"
+  },
+  "author": "drangwala@salesforce.com"
+}

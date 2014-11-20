@@ -1,0 +1,10 @@
+{
+  "name": "riqex",
+  "dependencies": {},
+  "devDependencies": {},
+  "ambientDependencies": {
+    "angular": "github:DefinitelyTyped/DefinitelyTyped/angularjs/angular.d.ts#fa3294c560ee49f4af43e02a62e3f4b5b6bbe5e5",
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#4cdfbe96b666eec5e1defbb519a62abf04e96764",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1fa3e10e0175d352b149ccbca794c9438d702b4e"
+  }
+}
