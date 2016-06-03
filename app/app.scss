@@ -1,3 +1,23 @@
-@import '../node_modules/uiq/src/styles/uiq.scss';
+@import '../node_modules/popgun/src/popgun.scss';
 
-@import '../src/index.scss';
+.target {
+    width: 75px;
+    height: 75px;
+    padding: 10px;
+    background: #cacac9;
+    margin-bottom: 25px;
+}
+
+.different-class {
+    background: #67bbaa;
+}
+
+.very-different-class {
+    background: #f16b50;
+}
+
+.one-final-different-class {
+    background: #1c4657;
+    margin: 0;
+    width: 150px;
+}

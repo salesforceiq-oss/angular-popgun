@@ -1,19 +1,40 @@
 ///<reference path="../typings/browser.d.ts" />
 
-import {SampleModule} from './SampleModule';
-
 declare var angular;
 declare var require;
+let popgun = require('popgun').default;
 
-export const name = 'SampleModule';
+export const name = 'AngularPopgun';
 
 export const angularModule = angular.module(name, [])
-  .directive('sampleModule', function() {
-    return {
-      restrict: 'E',
-      scope: {},
-      controller: SampleModule,
-      controllerAs: 'ctrl',
-      template: require('./index.html')
-    }
+  .factory('AngularPopgunSrvc', function($compile) {
+
+      let AngularPopgunSrvc = {
+
+        init: function($scope, $element): void {
+          $element[0].addEventListener('PopgunContentSetup', function(e) {
+            let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
+            $compile(pop.popEl.element)($scope);
+            $scope.$apply();
+          }, false);
+        },
+
+        registerGroup: function(groupId: string, opts: any): void {
+          popgun.registerGroup(groupId, opts);
+        },
+
+        registerSchema: function(schemaId: string, opts: any): void {
+          popgun.registerSchema(schemaId, opts);
+        },
+
+        getPopFromGroupId: function(groupId: string): any {
+          return popgun.getPopFromGroupId(groupId);
+        },
+
+        getPopState: function(groupId: string): string {
+          return popgun.getPopState(popgun.getPopFromGroupId(groupId));
+        }
+    };
+
+    return AngularPopgunSrvc;
   });

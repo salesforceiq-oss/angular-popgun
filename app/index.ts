@@ -1,54 +1,60 @@
 ///<reference path="../typings/browser.d.ts" />
 declare var require: NodeRequire;
 
-// This that LucidWeb normally provides
-// These should all be listed as peerDependencies of the app
 window['jQuery'] = require('jquery');
 require('angular');
-require('sugar');
-require('uiq');
 
-/* I've thought about this line for awhile.
- *
- * requiring the stuff from `src/` using the `var/require` method is nice
- * because you don't end up 'double-compiling'.  using the `import/require`
- * method causes all the source to get recompiled as a part of the app... which
- * is "technically" correct but not really what I'm looking for here (as in,
- * .app-src/src contains the same thing as .src)
- *
- * also this page is an app shell that bootstraps a similar environment to
- * LucidWeb, which is going to use the `var/require`, so it's not bad to use it
- * here too.  and really you shouldn't be adding much (if any) logic here, so
- * ultimately it doesn't matter.
- */
-var appLogic = require('../.src');
+let angularPopgun = require('../.src');
+let sampleModule = require('../.src/SampleModule');
 
-// Set up the shell app w/angular, uiq, and a router
-var router = require('web-core-router');
-var routerOptions = {
-  RouterCnst: router.makeRouterCnst()
-};
+module.exports = angular.module('app', [angularPopgun.name, sampleModule.name])
+  .controller('appCtrl', function($scope, $element, AngularPopgunSrvc) {
 
-/* even though shell-apps should really only have 1 view, having the url <=>
- * model binding is pretty nice (if say, you're working on import and want an
- * easy way to jump to step N)
- */
-routerOptions.RouterCnst.STATES = {
-  MAIN: {
-    name: 'main',
-    queryParams: [],
-    lazyQueryParams: [],
-    template: '<sample-module></sample-module>',
-    modelBindings: {},
-    default: true
-  }
-};
+    $scope.words = {
+      banana: {
+        word: 'Banana',
+        definition: 'Not as delicious as Cheetos!!'
+      },
+      donut: {
+        word: 'Donut',
+        definition: 'More delicious than Cheetos!!'
+      },
+      cheetos: {
+        word: 'Cheetos',
+        definition: 'Hot Cheetos are objectively the tastiest of all types of Cheetos.'
+      }
+    };
 
-// Bootstrap the shell-app module and configure the router
-module.exports = angular.module('shell-app', ['RouterCore', 'uiq', appLogic.name])
-  .config(router.defaultRuleConfig(routerOptions.RouterCnst))
-  .config(router.stateConfig(routerOptions))
-  .run(router.run(routerOptions));
+    function init($scope): void {
+      AngularPopgunSrvc.registerGroup('definitions', {
+        schemaId: null,
+        options: {
+          html: require('../.src/SampleModule/sampleModulePop.html'),
+          trigger: 'hover'
+        }
+      });
 
-window['q$'] = window['jQuery'];
-document.title = appLogic.name;
+      let el = document.createElement('div');
+      el.setAttribute('popgun', '');
+      el.setAttribute('class', 'target');
+      el.setAttribute('popgun-group', 'test');
+      el.setAttribute('popgun-trigger', 'click');
+      el.setAttribute('popgun-text', 'Clicking on a target will pin the popover, which you can unpin with the escape key or clicking elsewhere.');
+      el.innerText = 'Click Me!';
+      $element.append(el);
+
+      el = document.createElement('div');
+      el.setAttribute('popgun', '');
+      el.setAttribute('class', 'target different-class');
+      el.setAttribute('popgun-group', 'test2');
+      el.setAttribute('popgun-trigger', 'hover click');
+      el.setAttribute('popgun-html', '<div class="target one-final-different-class" popgun popgun-trigger="hover" popgun-html="Congratulations! You have discovered a nested pop!">Hover Me!!</div>');
+      el.innerText = 'Hover or Click Me!';
+      $element.append(el);
+
+    }
+
+    init($scope);
+  });
+
+document.title = angularPopgun.name;

@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>bedrock</title>
+        <title>angular-popgun</title>
 
         <link rel="stylesheet" type="text/css" href="app.css" />
 
@@ -11,8 +11,16 @@
             }
         </style>
     </head>
-    <body ng-app="shell-app">
-        <div class="app-content" ui-view></div>
+    <body ng-app="app">
+
+        <div ng-controller="appCtrl">
+            <h2>Angular-Popgun</h2>
+            <h4>The highly customizable and efficient UI tip.</h4>
+
+            <sample-module word="words.banana"></sample-module>
+            <sample-module word="words.donut"></sample-module>
+            <sample-module word="words.cheetos"></sample-module>
+        </div>
 
         <script src="app.js"></script>
     </body>
