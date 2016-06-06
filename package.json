@@ -1,7 +1,7 @@
 {
   "name": "angular-popgun",
   "version": "0.0.1",
-  "description": "angular adapter for popgun",
+  "description": "An AngularJS adapter for Popgun",
   "main": ".src/index.js",
   "homepage": "https://github.com/relateiq/angular-popgun",
   "repository": {
@@ -51,5 +51,15 @@
     "popgun": "~0.0.5"
   },
   "author": "Danyaal Rangwala <danyaal@rangwa.la>",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "pop",
+    "popover",
+    "tip",
+    "tooltip",
+    "popup",
+    "popgun",
+    "angularjs",
+    "angular"
+  ]
 }

@@ -84,4 +84,4 @@ Some Popgun attributes that you can define are:
 
 
 ## Run Demo Popgun Application
-Run `iqb start` in the root directory to run a demo application with Popgun.
+Run `iqb start` in the root directory to run a demo application with Angular-Popgun.
