@@ -12,7 +12,7 @@ export const angularModule = angular.module(name, [])
       let AngularPopgunSrvc = {
 
         init: function($scope, $element): void {
-          $element[0].addEventListener('PopgunContentSetup', function(e) {
+          document.body.addEventListener('PopgunContentSetup', function(e) {
             let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
             $compile(pop.popEl.element)($scope);
             $scope.$apply();
