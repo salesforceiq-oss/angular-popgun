@@ -48,7 +48,7 @@
     ]
   },
   "dependencies": {
-    "popgun": "~0.0.9"
+    "popgun": "~0.0.10"
   },
   "author": "Danyaal Rangwala <danyaal@rangwa.la>",
   "license": "MIT",
