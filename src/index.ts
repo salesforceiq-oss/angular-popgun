@@ -33,6 +33,14 @@ export const angularModule = angular.module(name, [])
 
         getPopState: function(groupId: string): string {
           return popgun.getPopState(popgun.getPopFromGroupId(groupId));
+        },
+
+        showPop: function(target: Element, isPinned: boolean, trigger: string): void {
+          return popgun.showPop(target, isPinned, trigger);
+        },
+
+        hidePop: function(target: Element): void {
+          return popgun.hidePop(target);
         }
     };
 
