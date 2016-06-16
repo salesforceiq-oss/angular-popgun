@@ -1,6 +1,6 @@
 {
   "name": "angular-popgun",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "An AngularJS adapter for Popgun",
   "main": ".src/index.js",
   "homepage": "https://github.com/relateiq/angular-popgun",
