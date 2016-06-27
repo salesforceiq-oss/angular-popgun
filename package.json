@@ -17,7 +17,8 @@
     "preversion": "bin/iqb test"
   },
   "peerDependencies": {
-    "angular": "1.x"
+    "angular": "1.x",
+    "popgun": "~0.0.17"
   },
   "devDependencies": {
     "aliasify": "~1.9.0",
@@ -46,9 +47,6 @@
     "transform": [
       "riq-partialify"
     ]
-  },
-  "dependencies": {
-    "popgun": "~0.0.16"
   },
   "author": "Danyaal Rangwala <danyaal@rangwa.la>",
   "license": "MIT",
