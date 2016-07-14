@@ -3,6 +3,7 @@
 declare var angular;
 declare var require;
 let popgun = require('popgun').default;
+popgun.init();
 
 export const name = 'AngularPopgun';
 
