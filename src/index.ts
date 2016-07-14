@@ -3,7 +3,6 @@
 declare var angular;
 declare var require;
 let popgun = require('popgun').default;
-popgun.init();
 
 export const name = 'AngularPopgun';
 
@@ -11,6 +10,10 @@ export const angularModule = angular.module(name, [])
   .factory('AngularPopgunSrvc', function($compile) {
 
       let AngularPopgunSrvc = {
+
+        appSetup: function(): void {
+          popgun.init();
+        },
 
         init: function($scope, $element): void {
           $element[0].addEventListener('PopgunContentSetup', function(e) {
