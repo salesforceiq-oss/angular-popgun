@@ -26,6 +26,7 @@ module.exports = angular.module('app', [angularPopgun.name, sampleModule.name])
     };
 
     function init($scope): void {
+      AngularPopgunSrvc.appSetup();
       AngularPopgunSrvc.registerGroup('definitions', {
         schemaId: null,
         options: {
