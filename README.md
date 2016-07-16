@@ -1,3 +1,7 @@
+[![npm][npm-badge]][npm-badge-url]
+[npm-badge]: https://img.shields.io/npm/v/angular-popgun.svg
+[npm-badge-url]: https://www.npmjs.com/package/angular-popgun
+
 # Angular-Popgun
 
 Welcome to Angular-Popgun - the AngularJS adapter for Popgun!!
