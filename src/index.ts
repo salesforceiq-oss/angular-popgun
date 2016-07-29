@@ -15,8 +15,9 @@ export const angularModule = angular.module(name, [])
           popgun.init();
         },
 
-        init: function($scope, $element): void {
-          $element[0].addEventListener('PopgunContentSetup', function(e) {
+        init: function($scope, el): void {
+          // remove eventlistener before adding.
+          el.addEventListener('PopgunContentSetup', function(e) {
             let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
             $compile(pop.popOver.element)($scope);
             $scope.$apply();
