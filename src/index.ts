@@ -16,12 +16,14 @@ export const angularModule = angular.module(name, [])
         },
 
         init: function($scope, el): void {
-          // remove eventlistener before adding.
-          el.addEventListener('PopgunContentSetup', function(e) {
-            let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
-            $compile(pop.popOver.element)($scope);
-            $scope.$apply();
-          }, false);
+          if (!el.hasAttribute('popgun-listening')) {
+            el.addEventListener('PopgunContentSetup', function(e) {
+              let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
+              $compile(pop.popOver.element)($scope);
+              $scope.$apply();
+            }, false);
+            el.setAttribute('popgun-listening', '');
+          }
         },
 
         // Store a group w/ options to reuse
