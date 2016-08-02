@@ -23,6 +23,8 @@ export const angularModule = angular.module(name, [])
               $scope.$apply();
             }, false);
             el.setAttribute('popgun-listening', '');
+          } else {
+            throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
           }
         },
 
