@@ -15,12 +15,17 @@ export const angularModule = angular.module(name, [])
           popgun.init();
         },
 
-        init: function($scope, $element): void {
-          $element[0].addEventListener('PopgunContentSetup', function(e) {
-            let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
-            $compile(pop.popOver.element)($scope);
-            $scope.$apply();
-          }, false);
+        init: function($scope, el): void {
+          if (!el.hasAttribute('popgun-listening')) {
+            el.addEventListener('PopgunContentSetup', function(e) {
+              let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
+              $compile(pop.popOver.element)($scope);
+              $scope.$apply();
+            }, false);
+            el.setAttribute('popgun-listening', '');
+          } else {
+            throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
+          }
         },
 
         // Store a group w/ options to reuse
