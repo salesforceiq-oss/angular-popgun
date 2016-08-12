@@ -26,8 +26,7 @@ export const angularModule = angular.module(name, [])
                   $newScope.$apply();
               };
             })($scope), false);
-            el.setAttribute('popgun-listening', '');
-
+            
             el.addEventListener('PopgunSwapContent', function(e) {
               let pop = popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
               if (pop) {
@@ -43,6 +42,7 @@ export const angularModule = angular.module(name, [])
                   angular.element(pop.popOver.element).remove();
               }
             });
+            
             el.setAttribute('popgun-listening', '');
           } else {
             throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
