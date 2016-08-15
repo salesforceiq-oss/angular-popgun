@@ -27,22 +27,17 @@ export const angularModule = angular.module(name, [])
               };
             })($scope), false);
             
-            el.addEventListener('PopgunSwapContent', function(e) {
-              let pop = popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
-              if (pop) {
-                  angular.element(pop.oldContent).scope().$destroy();
-                  angular.element(pop.oldContent).remove();
-              }
-            });
+            var cleanupPopHandler = function (e) {
+                var pop = e.detail.pop;
+                if (pop) {
+                    angular.element(pop.popOver.element).scope().$destroy();
+                    angular.element(pop.popOver.element).remove();
+                }
+            };
 
-            el.addEventListener('PopgunRemoveContent', function(e) {
-              let pop = popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
-              if (pop && pop.popOver) {
-                  angular.element(pop.popOver.element).scope().$destroy();
-                  angular.element(pop.popOver.element).remove();
-              }
-            });
-            
+            el.addEventListener('PopgunContentSwap', cleanupPopHandler);
+            el.addEventListener('PopgunRemoveContent', cleanupPopHandler);
+    
             el.setAttribute('popgun-listening', '');
           } else {
             throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
