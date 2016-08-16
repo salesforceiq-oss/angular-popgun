@@ -15,28 +15,31 @@ export const angularModule = angular.module(name, [])
           popgun.init();
         },
 
-        init: function($scope, el): void {
+        init: function($scope, el, preserveScope): void {
           if (!el.hasAttribute('popgun-listening')) {
-            el.addEventListener('PopgunContentSetup', (function($compileScope) {
-              return function (e) {
-                  let $newScope = $compileScope.$new();
-                  let pop =
-                      popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
-                  $compile(pop.popOver.element)($newScope);
-                  $newScope.$apply();
-              };
-            })($scope), false);
+            el.addEventListener('PopgunContentSetup', function (e) {
+              let $compileScope;
+              if (preserveScope) {
+                $compileScope = $scope;
+              } else {
+                $compileScope = $scope.$new();
+              }
+              let pop =
+                popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
+              $compile(pop.popOver.element)($compileScope);
+              $compileScope.$apply();
+            }, false);
             
-            var cleanupPopHandler = function (e) {
-                var pop = e.detail.pop;
-                if (pop) {
-                    angular.element(pop.popOver.element).scope().$destroy();
-                    angular.element(pop.popOver.element).remove();
-                }
+            let cleanupPopHandler = function (e) {
+              let pop = e.detail.pop;
+              if (pop) {
+                angular.element(pop.popOver.element).scope().$destroy();
+                angular.element(pop.popOver.element).remove();
+              }
             };
 
             el.addEventListener('PopgunContentSwap', cleanupPopHandler);
-            el.addEventListener('PopgunRemoveContent', cleanupPopHandler);
+            el.addEventListener('PopgunContentRemove', cleanupPopHandler);
     
             el.setAttribute('popgun-listening', '');
           } else {
