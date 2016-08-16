@@ -19,7 +19,7 @@ export const angularModule = angular.module(name, [])
           if (!el.hasAttribute('popgun-listening')) {
             let $compileScope;
             el.addEventListener('PopgunContentSetup', function (e) {
-              $compileScope = perserveScope ? $scope : $scope.$new();
+              $compileScope = preserveScope ? $scope : $scope.$new();
 
               let pop =
                 popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
