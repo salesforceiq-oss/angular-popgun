@@ -17,13 +17,10 @@ export const angularModule = angular.module(name, [])
 
         init: function($scope, el, preserveScope): void {
           if (!el.hasAttribute('popgun-listening')) {
+            let $compileScope;
             el.addEventListener('PopgunContentSetup', function (e) {
-              let $compileScope;
-              if (preserveScope) {
-                $compileScope = $scope;
-              } else {
-                $compileScope = $scope.$new();
-              }
+              $compileScope = perserveScope ? $scope : $scope.$new();
+
               let pop =
                 popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
               $compile(pop.popOver.element)($compileScope);
@@ -32,9 +29,15 @@ export const angularModule = angular.module(name, [])
             
             let cleanupPopHandler = function (e) {
               let pop = e.detail.pop;
-              if (pop) {
-                angular.element(pop.popOver.element).scope().$destroy();
-                angular.element(pop.popOver.element).remove();
+              if (pop && !preserveScope) {
+                let $popEl = angular.element(pop.popOver.element);
+                let $elementScope = $popEl.scope();
+                if ($compileScope === $elementScope) {
+                  $elementScope.$destroy();
+                  $popEl.remove();
+                } else {
+                  console.error('The scope associated to the content has somehow changed, can not destroy the scope.');
+                }
               }
             };
 
