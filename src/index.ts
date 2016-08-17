@@ -15,13 +15,35 @@ export const angularModule = angular.module(name, [])
           popgun.init();
         },
 
-        init: function($scope, el): void {
+        init: function($scope, el, preserveScope): void {
           if (!el.hasAttribute('popgun-listening')) {
-            el.addEventListener('PopgunContentSetup', function(e) {
-              let pop = popgun.getPopFromGroupId((<Element>e.target).getAttribute('popgun-group'));
-              $compile(pop.popOver.element)($scope);
-              $scope.$apply();
+            let $compileScope;
+            el.addEventListener('PopgunContentSetup', function (e) {
+              $compileScope = preserveScope ? $scope : $scope.$new();
+
+              let pop =
+                popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
+              $compile(pop.popOver.element)($compileScope);
+              $compileScope.$apply();
             }, false);
+            
+            let cleanupPopHandler = function (e) {
+              let pop = e.detail.pop;
+              if (pop && !preserveScope) {
+                let $popEl = angular.element(pop.popOver.element);
+                let $elementScope = $popEl.scope();
+                if ($compileScope === $elementScope) {
+                  $elementScope.$destroy();
+                  $popEl.remove();
+                } else {
+                  console.error('The scope associated to the content has somehow changed, can not destroy the scope.');
+                }
+              }
+            };
+
+            el.addEventListener('PopgunContentSwap', cleanupPopHandler);
+            el.addEventListener('PopgunContentRemove', cleanupPopHandler);
+    
             el.setAttribute('popgun-listening', '');
           } else {
             throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
