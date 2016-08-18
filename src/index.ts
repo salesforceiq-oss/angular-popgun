@@ -90,6 +90,11 @@ export const angularModule = angular.module(name, [])
         // Hide the popover for a particular target
         hidePop: function(target: Element, hideFullChain: boolean): void {
           return popgun.hidePop(target, hideFullChain);
+        },
+
+        // reposition the popover based on groupId for sync purposes
+        reposition: function(groupId: string): void {
+          popgun.reposition(groupId);
         }
     };
 
