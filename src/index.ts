@@ -18,14 +18,15 @@ export const angularModule = angular.module(name, [])
         init: function($scope, el, preserveScope): void {
           if (!el.hasAttribute('popgun-listening')) {
             let $compileScope;
-            el.addEventListener('PopgunContentSetup', function (e) {
+
+            let setupPopHandler = function (e) {
               $compileScope = preserveScope ? $scope : $scope.$new();
 
               let pop =
                 popgun.getPopFromGroupId(e.target.getAttribute('popgun-group'));
               $compile(pop.popOver.element)($compileScope);
               $compileScope.$apply();
-            }, false);
+            };
             
             let cleanupPopHandler = function (e) {
               let pop = e.detail.pop;
@@ -41,13 +42,24 @@ export const angularModule = angular.module(name, [])
               }
             };
 
+            el.addEventListener('PopgunContentSetup', setupPopHandler, false);
             el.addEventListener('PopgunContentSwap', cleanupPopHandler);
             el.addEventListener('PopgunContentRemove', cleanupPopHandler);
+
+            angular.element(el).on('_AngularPopgunDestroy', function() {
+              el.removeEventListener('PopgunContentSetup', setupPopHandler);
+              el.removeEventListener('PopgunContentSwap', cleanupPopHandler);
+              el.removeEventListener('PopgunContentRemove', cleanupPopHandler);
+              angular.element(el).off('_AngularPopgunDestroy');
+            });
     
             el.setAttribute('popgun-listening', '');
           } else {
             throw new Error('Popgun has already set a listener on this element. Do not instantiate again!');
           }
+        },
+        destroy: function(el: Element) {
+          angular.element(el).trigger('_AngularPopgunDestroy');
         },
 
         // Store a group w/ options to reuse
