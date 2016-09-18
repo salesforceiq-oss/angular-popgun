@@ -14,7 +14,8 @@
   "scripts": {
     "test": "bin/iqb test",
     "start": "bin/iqb start",
-    "preversion": "bin/iqb test"
+    "preversion": "bin/iqb build",
+    "postpublish": "git push"
   },
   "peerDependencies": {
     "angular": "1.x",
