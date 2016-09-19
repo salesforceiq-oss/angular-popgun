@@ -236,8 +236,8 @@ case $command in
   "watch:app:ts")   $CMD_TSC -w -p app/ ;;
   "build:app:ts")   $CMD_TSC -p app/ ;;
 
-  "watch:app:js")   $CMD_WATCHIFY .app/index.js -d -o "$CMD_EXORCIST release/app.js.map > release/app.js" ;;
-  "build:app:js")   $CMD_BROWSERIFY .app/index.js -d | $CMD_EXORCIST release/app.js.map > release/app.js ;;
+  "watch:app:js")   $CMD_WATCHIFY -t partialify .app/index.js -d -o "$CMD_EXORCIST release/app.js.map > release/app.js" ;;
+  "build:app:js")   $CMD_BROWSERIFY -t partialify .app/index.js -d | $CMD_EXORCIST release/app.js.map > release/app.js ;;
 
   "livereload")     $CMD_WATCH --silent release/* -c "curl -s http://localhost:${1:-35729}/changed\?files\=index.html" ;;
   "serve")
