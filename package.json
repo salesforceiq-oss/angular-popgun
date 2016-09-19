@@ -44,11 +44,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "browserify-shim": {},
-  "browserify": {
-    "transform": [
-      "partialify"
-    ]
-  },
   "author": "Danyaal Rangwala <danyaal@rangwa.la>",
   "license": "MIT",
   "keywords": [

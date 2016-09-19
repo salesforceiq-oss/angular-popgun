@@ -5,7 +5,7 @@ window['jQuery'] = require('jquery');
 require('angular');
 
 let angularPopgun = require('../.src');
-let sampleModule = require('../.src/SampleModule');
+let sampleModule = require('../.app/SampleModule');
 
 module.exports = angular.module('app', [angularPopgun.name, sampleModule.name])
   .controller('appCtrl', function($scope, $element, AngularPopgunSrvc) {
@@ -30,7 +30,7 @@ module.exports = angular.module('app', [angularPopgun.name, sampleModule.name])
       AngularPopgunSrvc.registerGroup('definitions', {
         schemaId: null,
         options: {
-          html: require('../.src/SampleModule/sampleModulePop.html'),
+          html: require('../.app/SampleModule/sampleModulePop.html'),
           trigger: 'hover'
         }
       });
