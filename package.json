@@ -1,6 +1,6 @@
 {
   "name": "angular-popgun",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "An AngularJS adapter for Popgun",
   "main": ".src/index.js",
   "homepage": "https://github.com/relateiq/angular-popgun",
@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "angular": "1.x",
-    "popgun": "0.x"
+    "popgun": "1.x"
   },
   "devDependencies": {
     "aliasify": "~1.9.0",
