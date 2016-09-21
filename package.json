@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "angular": "1.x",
-    "popgun": "0.x"
+    "popgun": "1.x"
   },
   "devDependencies": {
     "aliasify": "~1.9.0",
